@@ -16,7 +16,7 @@ function StatsView() {
     setError(null);
 
     try {
-      const response = await fetch('/api.php', {
+      const response = await fetch('/api', {
         method: 'GET'
       });
 

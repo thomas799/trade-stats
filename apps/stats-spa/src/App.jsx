@@ -42,7 +42,7 @@ function App() {
             std_dev: payload.stdDev
           };
 
-          const response = await fetch('/api.php', {
+          const response = await fetch('/api', {
             body: JSON.stringify(apiPayload),
             headers: {
               'Content-Type': 'application/json'
