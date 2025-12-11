@@ -8,9 +8,14 @@ dist/
 # Misc
 .DS_Store
 *.env*
+!.env.example
 
 # Logs
 *.log*
 
 # Turbo
 .turbo/
+
+# Docker
+*.sql.backup
+backup_*.sql
