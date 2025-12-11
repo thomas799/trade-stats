@@ -5,14 +5,19 @@ class Database
     private static ?Database $instance = null;
     private ?PDO $connection = null;
 
-    private string $host = 'localhost';
-    private string $dbname = 'trade_stats_db';
-    private string $username = 'root';
-    private string $password = '';
+    private string $host;
+    private string $dbname;
+    private string $username;
+    private string $password;
     private string $charset = 'utf8mb4';
 
     private function __construct()
     {
+        $this->host = getenv('DB_HOST') ?: 'mysql';
+        $this->dbname = getenv('DB_NAME') ?: 'trade_stats_db';
+        $this->username = getenv('DB_USER') ?: 'trade_stats_user';
+        $this->password = getenv('DB_PASSWORD') ?: 'trade_stats_password';
+
         $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset={$this->charset}";
 
         $options = [
