@@ -1,35 +1,172 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useRef, useState } from 'react';
+
+import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
+
+import ControlPanel from './components/ControlPanel';
+import StatsView from './components/StatsView';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isConnected, setIsConnected] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+  const [batchSize, setBatchSize] = useState(100);
+  const [showStats, setShowStats] = useState(false);
+  const [status, setStatus] = useState('');
+
+  const wsRef = useRef(null);
+  const workerRef = useRef(null);
+  const localCountRef = useRef(0);
+  const quoteIdRef = useRef(0);
+
+  useEffect(() => {
+    workerRef.current = new Worker(MathWorkerUrl, { type: 'module' });
+
+    workerRef.current.onmessage = async (e) => {
+      const { payload, type } = e.data;
+
+      if (type === 'READY') {
+        setStatus('Worker is ready to work');
+        return;
+      }
+
+      if (type === 'STATS') {
+        try {
+          setStatus('Sending statistics to server...');
+
+          const response = await fetch('/api.php', {
+            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            method: 'POST'
+          });
+
+          if (response.ok) {
+            setStatus(`Batch of ${batchSize} quotes processed and sent`);
+          } else {
+            setStatus('Error sending to server');
+          }
+        } catch (error) {
+          setStatus('Error: ' + error.message);
+          console.error('Error sending stats:', error);
+        }
+
+        localCountRef.current = 0;
+      }
+
+      if (type === 'RESET_COMPLETE') {
+        setStatus('Statistics reset to Worker');
+      }
+    };
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, [batchSize]);
+
+  const handleStart = () => {
+    if (isConnected) {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      setIsConnected(false);
+      setStatus('Connection closed');
+      return;
+    }
+
+    try {
+      const ws = new WebSocket('wss://trade.termplat.com:8800/?password=1234');
+
+      ws.onopen = () => {
+        setIsConnected(true);
+        setStatus('Connected to WebSocket');
+        localCountRef.current = 0;
+        setMessageCount(0);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const quote = JSON.parse(event.data);
+
+          workerRef.current.postMessage({
+            payload: {
+              id: quoteIdRef.current++,
+              value: parseFloat(quote.price || quote.value || quote)
+            },
+            type: 'DATA'
+          });
+
+          localCountRef.current += 1;
+          setMessageCount((prev) => prev + 1);
+
+          if (localCountRef.current >= batchSize) {
+            workerRef.current.postMessage({ type: 'GET_STATS' });
+          }
+        } catch (error) {
+          console.error('Error processing quote:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        setStatus('WebSocket Error');
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        setIsConnected(false);
+        setStatus('Connection closed');
+      };
+
+      wsRef.current = ws;
+    } catch (error) {
+      setStatus('Connection error: ' + error.message);
+      console.error('Connection error:', error);
+    }
+  };
+
+  const handleShowStats = () => {
+    setShowStats(!showStats);
+  };
+
+  const handleReset = () => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({ type: 'RESET' });
+      localCountRef.current = 0;
+      setMessageCount(0);
+      quoteIdRef.current = 0;
+      setStatus('Resetting statistics...');
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      <header className="app-header">
+        <h1>Trade Statistics Monitor</h1>
+      </header>
+
+      <main className="app-main">
+        <ControlPanel
+          batchSize={batchSize}
+          isConnected={isConnected}
+          messageCount={messageCount}
+          setBatchSize={setBatchSize}
+          showStats={showStats}
+          status={status}
+          onReset={handleReset}
+          onShowStats={handleShowStats}
+          onStart={handleStart}
+        />
+
+        {showStats && <StatsView />}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
