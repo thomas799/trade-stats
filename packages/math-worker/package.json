@@ -7,11 +7,10 @@
     "index.js",
     "README.md"
   ],
-  "keywords": [
-    "web-worker",
-    "statistics",
-    "welford",
-    "streaming"
-  ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@stdlib/stats-incr-meanstdev": "^0.2.2",
+    "@stdlib/stats-incr-minmax": "^0.2.2",
+    "bloom-filters": "^3.0.4"
+  }
 }

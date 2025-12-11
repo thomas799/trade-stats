@@ -1,46 +1,38 @@
+import incrmeanstdev from '@stdlib/stats-incr-meanstdev';
+import incrminmax from '@stdlib/stats-incr-minmax';
+import { TopK } from 'bloom-filters';
+
+const MODE_TRACKER_K = 10;
+const MODE_ERROR_RATE = 0.001;
+const MODE_ACCURACY = 0.99;
+
 let state = createInitialState();
 
 function createInitialState() {
   return {
-    frequencyMap: new Map(),
     lastCalcTime: 0,
     lastId: null,
     lostPackets: 0,
-    M2: 0,
-    max: -Infinity,
-    mean: 0,
-    min: Infinity,
-    mode: null,
-    modeFrequency: 0,
-    n: 0
+    meanStdAcc: incrmeanstdev(),
+    minMaxAcc: incrminmax(),
+    n: 0,
+    topK: new TopK(MODE_TRACKER_K, MODE_ERROR_RATE, MODE_ACCURACY)
   };
 }
 
-function updateWelford(x) {
-  state.n++;
-  const delta = x - state.mean;
-  state.mean += delta / state.n;
-  const delta2 = x - state.mean;
-  state.M2 += delta * delta2;
-}
-
-function getVariance() {
-  if (state.n < 2) return 0;
-  return state.M2 / (state.n - 1);
-}
-
-function getStdDev() {
-  return Math.sqrt(getVariance());
-}
-
 function updateMode(price) {
-  const normalizedPrice = Math.round(price * 100) / 100;
-  const currentFreq = (state.frequencyMap.get(normalizedPrice) || 0) + 1;
-  state.frequencyMap.set(normalizedPrice, currentFreq);
-  if (currentFreq > state.modeFrequency) {
-    state.mode = normalizedPrice;
-    state.modeFrequency = currentFreq;
-  }
+  const normalizedPrice = String(Math.round(price * 100) / 100);
+  state.topK.add(normalizedPrice);
+}
+
+function getMode() {
+  const values = state.topK.values();
+  if (values.length === 0) return { frequency: 0, mode: null };
+  const top = values[0];
+  return {
+    frequency: top.frequency,
+    mode: parseFloat(top.value)
+  };
 }
 
 function checkPacketLoss(id) {
@@ -53,36 +45,35 @@ function checkPacketLoss(id) {
   state.lastId = id;
 }
 
-function updateMinMax(value) {
-  if (value < state.min) state.min = value;
-  if (value > state.max) state.max = value;
-}
-
 function processData(id, value) {
   const startTime = performance.now();
   checkPacketLoss(id);
-  updateWelford(value);
-  updateMinMax(value);
+  state.n++;
+  state.meanStdAcc(value);
+  state.minMaxAcc(value);
   updateMode(value);
   state.lastCalcTime = performance.now() - startTime;
 }
 
 function getStats() {
   const startTime = performance.now();
+  const modeInfo = getMode();
+  const [mean, stdDev] = state.meanStdAcc() || [null, null];
+  const [min, max] = state.minMaxAcc() || [null, null];
+
   const stats = {
     count: state.n,
     lastCalcTime: state.lastCalcTime,
     lastId: state.lastId,
     lostPackets: state.lostPackets,
-    max: state.n > 0 ? state.max : null,
-    mean: state.n > 0 ? state.mean : null,
-    min: state.n > 0 ? state.min : null,
-    mode: state.mode,
-    modeFrequency: state.modeFrequency,
+    max: state.n > 0 ? max : null,
+    mean: state.n > 0 ? mean : null,
+    min: state.n > 0 ? min : null,
+    mode: modeInfo.mode,
+    modeFrequency: modeInfo.frequency,
+    modeIsApproximate: true,
     statsGenerationTime: performance.now() - startTime,
-    stdDev: state.n > 1 ? getStdDev() : null,
-    uniquePrices: state.frequencyMap.size,
-    variance: state.n > 1 ? getVariance() : null
+    stdDev: state.n > 1 ? stdDev : null
   };
   return stats;
 }
