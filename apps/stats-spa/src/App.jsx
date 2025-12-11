@@ -16,7 +16,6 @@ function App() {
   const wsRef = useRef(null);
   const workerRef = useRef(null);
   const localCountRef = useRef(0);
-  const quoteIdRef = useRef(0);
 
   useEffect(() => {
     workerRef.current = new Worker(MathWorkerUrl, { type: 'module' });
@@ -33,8 +32,18 @@ function App() {
         try {
           setStatus('Sending statistics to server...');
 
+          const apiPayload = {
+            calc_time: payload.statsGenerationTime,
+            lost_quotes: payload.lostPackets,
+            max_value: payload.max,
+            mean: payload.mean,
+            min_value: payload.min,
+            mode: payload.mode,
+            std_dev: payload.stdDev
+          };
+
           const response = await fetch('/api.php', {
-            body: JSON.stringify(payload),
+            body: JSON.stringify(apiPayload),
             headers: {
               'Content-Type': 'application/json'
             },
@@ -96,8 +105,8 @@ function App() {
 
           workerRef.current.postMessage({
             payload: {
-              id: quoteIdRef.current++,
-              value: parseFloat(quote.price || quote.value || quote)
+              id: quote.id,
+              value: parseFloat(quote.value)
             },
             type: 'DATA'
           });
@@ -139,7 +148,6 @@ function App() {
       workerRef.current.postMessage({ type: 'RESET' });
       localCountRef.current = 0;
       setMessageCount(0);
-      quoteIdRef.current = 0;
       setStatus('Resetting statistics...');
     }
   };

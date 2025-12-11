@@ -1,6 +1,6 @@
 import { TopK } from 'bloom-filters';
 
-const MODE_TRACKER_K = 10;
+const MODE_TRACKER_K = 100;
 const MODE_ERROR_RATE = 0.001;
 const MODE_ACCURACY = 0.99;
 

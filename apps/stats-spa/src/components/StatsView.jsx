@@ -25,7 +25,7 @@ function StatsView() {
       }
 
       const data = await response.json();
-      setStats(Array.isArray(data) ? data : []);
+      setStats(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       setError(err.message);
       console.error('Error loading stats:', err);
@@ -90,25 +90,27 @@ function StatsView() {
               <tr>
                 <th>ID</th>
                 <th>Date</th>
-                <th>Count</th>
                 <th>Mean</th>
-                <th>Median</th>
+                <th>Std. Dev.</th>
+                <th>Mode</th>
                 <th>Min</th>
                 <th>Max</th>
-                <th>Std. Dev.</th>
+                <th>Lost</th>
+                <th>Calc Time</th>
               </tr>
             </thead>
             <tbody>
               {stats.map((stat) => (
                 <tr key={stat.id}>
                   <td>{stat.id}</td>
-                  <td>{formatDate(stat.created_at || stat.timestamp)}</td>
-                  <td>{stat.count}</td>
-                  <td>{formatNumber(stat.average || stat.mean)}</td>
-                  <td>{formatNumber(stat.median)}</td>
-                  <td>{formatNumber(stat.min)}</td>
-                  <td>{formatNumber(stat.max)}</td>
-                  <td>{formatNumber(stat.std_dev || stat.stdDev)}</td>
+                  <td>{formatDate(stat.created_at)}</td>
+                  <td>{formatNumber(stat.mean)}</td>
+                  <td>{formatNumber(stat.std_dev)}</td>
+                  <td>{formatNumber(stat.mode)}</td>
+                  <td>{formatNumber(stat.min_value)}</td>
+                  <td>{formatNumber(stat.max_value)}</td>
+                  <td>{stat.lost_quotes}</td>
+                  <td>{stat.calc_time?.toFixed(3)} ms</td>
                 </tr>
               ))}
             </tbody>
