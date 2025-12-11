@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+*.pnp*
+
+# Production
+dist/
+
+# Misc
+.DS_Store
+*.env*
+
+# Logs
+*.log*
+
+# Turbo
+.turbo/
