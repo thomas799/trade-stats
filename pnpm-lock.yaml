@@ -44,6 +44,9 @@ importers:
 
   apps/stats-spa:
     dependencies:
+      '@trade-stats/math-worker':
+        specifier: workspace:*
+        version: link:../../packages/math-worker
       react:
         specifier: ^19.2.0
         version: 19.2.1
@@ -75,6 +78,8 @@ importers:
       vite:
         specifier: ^7.2.4
         version: 7.2.7
+
+  packages/math-worker: {}
 
 packages:
 

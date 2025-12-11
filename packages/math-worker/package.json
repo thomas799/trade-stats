@@ -1,0 +1,17 @@
+{
+  "name": "@trade-stats/math-worker",
+  "version": "1.0.0",
+  "description": "Web Worker for stream processing of cryptocurrency data with statistics calculation",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "keywords": [
+    "web-worker",
+    "statistics",
+    "welford",
+    "streaming"
+  ],
+  "license": "MIT"
+}
