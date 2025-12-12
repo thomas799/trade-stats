@@ -12,16 +12,6 @@ import { formatNumber } from '../utils/formatters';
 import MetricItem from './MetricItem';
 
 function LiveMetrics({ metrics }) {
-  if (!metrics) {
-    return (
-      <Paper withBorder p="md" shadow="sm">
-        <Text c="dimmed" size="sm">
-          Waiting for data...
-        </Text>
-      </Paper>
-    );
-  }
-
   return (
     <Paper withBorder p="md" shadow="sm">
       <Stack gap="sm">

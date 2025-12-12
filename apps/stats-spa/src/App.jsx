@@ -1,6 +1,13 @@
 import { useState } from 'react';
 
-import { Container, MantineProvider, Stack, Title } from '@mantine/core';
+import {
+  Container,
+  MantineProvider,
+  Paper,
+  Stack,
+  Text,
+  Title
+} from '@mantine/core';
 import '@mantine/core/styles.css';
 import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
 
@@ -95,7 +102,15 @@ function App() {
             onStart={handleStart}
           />
 
-          <LiveMetrics metrics={liveMetrics} />
+          {liveMetrics ? (
+            <LiveMetrics metrics={liveMetrics} />
+          ) : (
+            <Paper withBorder p="md" shadow="sm">
+              <Text c="dimmed" size="sm">
+                Waiting for data...
+              </Text>
+            </Paper>
+          )}
 
           {showStats && <StatsView />}
         </Stack>
