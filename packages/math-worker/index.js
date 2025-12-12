@@ -23,6 +23,7 @@ function createInitialState() {
 function processData(id, value) {
   const startTime = performance.now();
   const packetLoss = checkPacketLoss(state.lastId, id);
+
   state.lostPackets += packetLoss;
   state.lastId = id;
   state.n++;
@@ -37,7 +38,7 @@ function getStats() {
   const { max, min } = getMinMax(state.accumulators);
   const modeInfo = getMode(state.modeTracker);
 
-  const stats = {
+  return {
     count: state.n,
     lastCalcTime: state.lastCalcTime,
     lastId: state.lastId,
@@ -51,7 +52,6 @@ function getStats() {
     statsGenerationTime: performance.now() - startTime,
     stdDev: state.n > 1 ? stdDev : null
   };
-  return stats;
 }
 
 self.onmessage = function (event) {
@@ -89,7 +89,7 @@ self.onmessage = function (event) {
       });
       break;
     default:
-      console.warn(`[mathWorker] Unknown message type: ${type}`);
+      break;
   }
 };
 
