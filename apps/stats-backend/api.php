@@ -89,8 +89,7 @@ function handleGet(PDO $pdo): void
         $stmt = $pdo->prepare(
             'SELECT id, mean, std_dev, mode, min_value, max_value, lost_quotes, calc_time, created_at
              FROM trade_stats
-             ORDER BY created_at DESC
-             LIMIT 50'
+             ORDER BY created_at DESC'
         );
 
         $stmt->execute();
