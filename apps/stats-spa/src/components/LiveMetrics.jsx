@@ -8,18 +8,8 @@ import {
   Title
 } from '@mantine/core';
 
-function MetricItem({ label, unit = '', value }) {
-  return (
-    <Stack gap={2}>
-      <Text c="dimmed" size="xs">
-        {label}
-      </Text>
-      <Text fw={600} size="sm">
-        {value !== null && value !== undefined ? `${value}${unit}` : '—'}
-      </Text>
-    </Stack>
-  );
-}
+import { formatNumber } from '../utils/formatters';
+import MetricItem from './MetricItem';
 
 function LiveMetrics({ metrics }) {
   if (!metrics) {
@@ -31,11 +21,6 @@ function LiveMetrics({ metrics }) {
       </Paper>
     );
   }
-
-  const formatNumber = (num, decimals = 2) => {
-    if (num === null || num === undefined) return null;
-    return Number(num).toFixed(decimals);
-  };
 
   return (
     <Paper withBorder p="md" shadow="sm">
