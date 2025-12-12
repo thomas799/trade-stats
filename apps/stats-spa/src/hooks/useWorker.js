@@ -5,6 +5,16 @@ export function useWorker({ onReady, onResetComplete, onStats, workerUrl }) {
   const [isReady, setIsReady] = useState(false);
   const [liveMetrics, setLiveMetrics] = useState(null);
 
+  const onStatsRef = useRef(onStats);
+  const onReadyRef = useRef(onReady);
+  const onResetCompleteRef = useRef(onResetComplete);
+
+  useEffect(() => {
+    onStatsRef.current = onStats;
+    onReadyRef.current = onReady;
+    onResetCompleteRef.current = onResetComplete;
+  }, [onStats, onReady, onResetComplete]);
+
   useEffect(() => {
     workerRef.current = new Worker(workerUrl, { type: 'module' });
 
@@ -13,18 +23,18 @@ export function useWorker({ onReady, onResetComplete, onStats, workerUrl }) {
 
       if (type === 'READY') {
         setIsReady(true);
-        if (onReady) onReady();
+        if (onReadyRef.current) onReadyRef.current();
         return;
       }
 
       if (type === 'STATS') {
         setLiveMetrics(payload);
-        if (onStats) await onStats(payload);
+        if (onStatsRef.current) await onStatsRef.current(payload);
       }
 
       if (type === 'RESET_COMPLETE') {
         setLiveMetrics(null);
-        if (onResetComplete) onResetComplete();
+        if (onResetCompleteRef.current) onResetCompleteRef.current();
       }
     };
 
@@ -33,7 +43,7 @@ export function useWorker({ onReady, onResetComplete, onStats, workerUrl }) {
         workerRef.current.terminate();
       }
     };
-  }, [workerUrl, onStats, onReady, onResetComplete]);
+  }, [workerUrl]);
 
   const postMessage = (type, payload) => {
     if (workerRef.current) {

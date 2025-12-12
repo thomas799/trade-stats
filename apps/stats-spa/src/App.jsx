@@ -36,20 +36,24 @@ function App() {
       setStatus('Sending statistics to server...');
 
       try {
+        const payload = transformStatsForAPI(stats);
+
         const response = await fetch(API_ENDPOINT, {
-          body: JSON.stringify(transformStatsForAPI(stats)),
+          body: JSON.stringify(payload),
           headers: {
             'Content-Type': 'application/json'
           },
           method: 'POST'
         });
 
-        await response.json().catch(() => null);
+        const result = await response.json().catch(() => null);
 
         if (response.ok) {
-          setStatus(`Batch of ${batchSize} quotes processed and sent`);
+          setStatus(
+            `Batch of ${batchSize} quotes processed and sent (ID: ${result?.id || 'unknown'})`
+          );
         } else {
-          setStatus('Error sending to server');
+          setStatus(`Error sending to server: ${response.status}`);
         }
       } catch (error) {
         setStatus('Error: ' + error.message);
@@ -60,7 +64,9 @@ function App() {
 
   const { processMessage, resetBatch } = useBatchProcessor({
     batchSize,
-    onBatchComplete: () => postToWorker('GET_STATS'),
+    onBatchComplete: () => {
+      postToWorker('GET_STATS');
+    },
     onQuote: (quote) => postToWorker('DATA', quote)
   });
 
