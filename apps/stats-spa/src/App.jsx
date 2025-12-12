@@ -12,8 +12,8 @@ import '@mantine/core/styles.css';
 import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
 
 import ControlPanel from './components/ControlPanel';
-import LiveMetrics from './components/LiveMetrics';
-import StatsView from './components/StatsView';
+import LiveMetrics from './components/metrics/LiveMetrics';
+import StatsView from './components/stats/StatsView';
 import { useBatchProcessor } from './hooks/useBatchProcessor';
 import { useWebSocket } from './hooks/useWebSocket';
 import { useWorker } from './hooks/useWorker';

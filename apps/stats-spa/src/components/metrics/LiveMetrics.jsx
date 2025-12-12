@@ -8,8 +8,8 @@ import {
   Title
 } from '@mantine/core';
 
-import { formatNumber } from '../utils/formatters';
-import MetricItem from './MetricItem';
+import { formatNumber } from '../../utils/formatters';
+import MetricItem from '../MetricItem';
 
 function LiveMetrics({ metrics }) {
   return (
