@@ -13,6 +13,7 @@
   "dependencies": {
     "@mantine/core": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
+    "@tanstack/react-virtual": "^3.13.13",
     "@trade-stats/math-worker": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
