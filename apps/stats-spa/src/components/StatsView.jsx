@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import './StatsView.css';
+import { Alert, Button, Loader, Stack, Table, Title } from '@mantine/core';
 
 function StatsView() {
   const [stats, setStats] = useState([]);
@@ -46,78 +46,71 @@ function StatsView() {
 
   if (loading) {
     return (
-      <div className="stats-view">
-        <div className="stats-header">
-          <h2>Statistics History</h2>
-          <button className="btn btn-refresh" onClick={loadStats}>
-            Refresh
-          </button>
-        </div>
-        <div className="loading">Loading...</div>
-      </div>
+      <Stack align="center" mt="xl">
+        <Loader size="lg" />
+      </Stack>
     );
   }
 
   if (error) {
     return (
-      <div className="stats-view">
-        <div className="stats-header">
-          <h2>Statistics History</h2>
-          <button className="btn btn-refresh" onClick={loadStats}>
-            Refresh
-          </button>
-        </div>
-        <div className="error">Error: {error}</div>
-      </div>
+      <Stack mt="md">
+        <Alert color="red" title="Error">
+          {error}
+        </Alert>
+        <Button onClick={loadStats}>Retry</Button>
+      </Stack>
     );
   }
 
+  const rows = stats.map((stat) => (
+    <Table.Tr key={stat.id}>
+      <Table.Td>{stat.id}</Table.Td>
+      <Table.Td>{formatDate(stat.created_at)}</Table.Td>
+      <Table.Td>{formatNumber(stat.mean)}</Table.Td>
+      <Table.Td>{formatNumber(stat.std_dev)}</Table.Td>
+      <Table.Td>{formatNumber(stat.mode)}</Table.Td>
+      <Table.Td>{formatNumber(stat.min_value)}</Table.Td>
+      <Table.Td>{formatNumber(stat.max_value)}</Table.Td>
+      <Table.Td>{stat.lost_quotes}</Table.Td>
+      <Table.Td>{stat.calc_time?.toFixed(3)} ms</Table.Td>
+    </Table.Tr>
+  ));
+
   return (
-    <div className="stats-view">
-      <div className="stats-header">
-        <h2>Statistics History</h2>
-        <button className="btn btn-refresh" onClick={loadStats}>
-          Refresh
-        </button>
+    <Stack mt="md">
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Title order={2}>Statistics History</Title>
+        <Button onClick={loadStats}>Refresh</Button>
       </div>
 
       {stats.length === 0 ? (
-        <div className="no-data">No data to display</div>
+        <Alert color="blue">No data to display</Alert>
       ) : (
-        <div className="table-container">
-          <table className="stats-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Mean</th>
-                <th>Std. Dev.</th>
-                <th>Mode</th>
-                <th>Min</th>
-                <th>Max</th>
-                <th>Lost</th>
-                <th>Calc Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.map((stat) => (
-                <tr key={stat.id}>
-                  <td>{stat.id}</td>
-                  <td>{formatDate(stat.created_at)}</td>
-                  <td>{formatNumber(stat.mean)}</td>
-                  <td>{formatNumber(stat.std_dev)}</td>
-                  <td>{formatNumber(stat.mode)}</td>
-                  <td>{formatNumber(stat.min_value)}</td>
-                  <td>{formatNumber(stat.max_value)}</td>
-                  <td>{stat.lost_quotes}</td>
-                  <td>{stat.calc_time?.toFixed(3)} ms</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table highlightOnHover striped withTableBorder>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>ID</Table.Th>
+              <Table.Th>Date</Table.Th>
+              <Table.Th>Mean</Table.Th>
+              <Table.Th>Std. Dev.</Table.Th>
+              <Table.Th>Mode</Table.Th>
+              <Table.Th>Min</Table.Th>
+              <Table.Th>Max</Table.Th>
+              <Table.Th>Lost</Table.Th>
+              <Table.Th>Calc Time</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
       )}
-    </div>
+    </Stack>
   );
 }
 

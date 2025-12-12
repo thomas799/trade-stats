@@ -1,4 +1,12 @@
-import './ControlPanel.css';
+import {
+  Badge,
+  Button,
+  Group,
+  NumberInput,
+  Paper,
+  Stack,
+  Text
+} from '@mantine/core';
 
 function ControlPanel({
   batchSize,
@@ -11,75 +19,61 @@ function ControlPanel({
   showStats,
   status
 }) {
-  const handleBatchSizeChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      setBatchSize(value);
-    }
-  };
-
   return (
-    <div className="control-panel">
-      <div className="panel-section">
-        <h2>Management</h2>
+    <Paper withBorder p="md" shadow="sm">
+      <Stack gap="md">
+        <NumberInput
+          disabled={isConnected}
+          label="Number of quotes in the batch"
+          min={1}
+          value={batchSize}
+          onChange={setBatchSize}
+        />
 
-        <div className="input-group">
-          <label htmlFor="batchSize">Number of quotes in the batch:</label>
-          <input
-            className="batch-input"
-            disabled={isConnected}
-            id="batchSize"
-            min="1"
-            type="number"
-            value={batchSize}
-            onChange={handleBatchSizeChange}
-          />
-        </div>
-
-        <div className="button-group">
-          <button
-            className={`btn btn-primary ${isConnected ? 'btn-stop' : 'btn-start'}`}
-            onClick={onStart}
-          >
+        <Group>
+          <Button color={isConnected ? 'red' : 'green'} onClick={onStart}>
             {isConnected ? 'Stop' : 'Start'}
-          </button>
+          </Button>
 
-          <button className="btn btn-secondary" onClick={onShowStats}>
+          <Button variant="default" onClick={onShowStats}>
             {showStats ? 'Hide statistics' : 'Statistics'}
-          </button>
+          </Button>
 
-          <button
-            className="btn btn-danger"
+          <Button
+            color="red"
             disabled={isConnected}
+            variant="outline"
             onClick={onReset}
           >
             Reset
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
 
-      <div className="panel-section status-section">
-        <div className="status-item">
-          <span className="status-label">Status:</span>
-          <span
-            className={`status-value ${isConnected ? 'connected' : 'disconnected'}`}
-          >
-            {isConnected ? 'Connected' : 'Disconnected'}
-          </span>
-        </div>
+        <Stack gap="xs">
+          <Group>
+            <Text fw={500} size="sm">
+              Status:
+            </Text>
+            <Badge color={isConnected ? 'green' : 'gray'}>
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </Badge>
+          </Group>
 
-        <div className="status-item">
-          <span className="status-label">Messages received:</span>
-          <span className="status-value">{messageCount}</span>
-        </div>
+          <Group>
+            <Text fw={500} size="sm">
+              Messages received:
+            </Text>
+            <Badge variant="light">{messageCount}</Badge>
+          </Group>
 
-        {status && (
-          <div className="status-item status-message">
-            <span className="status-value">{status}</span>
-          </div>
-        )}
-      </div>
-    </div>
+          {status && (
+            <Text c="dimmed" size="sm">
+              {status}
+            </Text>
+          )}
+        </Stack>
+      </Stack>
+    </Paper>
   );
 }
 

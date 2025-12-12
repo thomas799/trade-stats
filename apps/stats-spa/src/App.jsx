@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { Container, MantineProvider, Stack, Title } from '@mantine/core';
+import '@mantine/core/styles.css';
 import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
 
 import ControlPanel from './components/ControlPanel';
 import StatsView from './components/StatsView';
-import './App.css';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -153,27 +154,27 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Trade Statistics Monitor</h1>
-      </header>
+    <MantineProvider>
+      <Container py="md" size="xl">
+        <Stack gap="lg">
+          <Title order={1}>Trade Statistics Monitor</Title>
 
-      <main className="app-main">
-        <ControlPanel
-          batchSize={batchSize}
-          isConnected={isConnected}
-          messageCount={messageCount}
-          setBatchSize={setBatchSize}
-          showStats={showStats}
-          status={status}
-          onReset={handleReset}
-          onShowStats={handleShowStats}
-          onStart={handleStart}
-        />
+          <ControlPanel
+            batchSize={batchSize}
+            isConnected={isConnected}
+            messageCount={messageCount}
+            setBatchSize={setBatchSize}
+            showStats={showStats}
+            status={status}
+            onReset={handleReset}
+            onShowStats={handleShowStats}
+            onStart={handleStart}
+          />
 
-        {showStats && <StatsView />}
-      </main>
-    </div>
+          {showStats && <StatsView />}
+        </Stack>
+      </Container>
+    </MantineProvider>
   );
 }
 
