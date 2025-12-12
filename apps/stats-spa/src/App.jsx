@@ -3,16 +3,13 @@ import { useState } from 'react';
 import {
   Container,
   MantineProvider,
-  Paper,
   Stack,
-  Text,
   Title
 } from '@mantine/core';
 import '@mantine/core/styles.css';
 import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
 
 import ControlPanel from './components/ControlPanel';
-import LiveMetrics from './components/metrics/LiveMetrics';
 import StatsView from './components/stats/StatsView';
 import { useBatchProcessor } from './hooks/useBatchProcessor';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -99,6 +96,7 @@ function App() {
           <ControlPanel
             batchSize={batchSize}
             isConnected={isConnected}
+            liveMetrics={liveMetrics}
             messageCount={messageCount}
             setBatchSize={setBatchSize}
             showStats={showStats}
@@ -107,16 +105,6 @@ function App() {
             onShowStats={toggleShowStats}
             onStart={handleStart}
           />
-
-          {liveMetrics ? (
-            <LiveMetrics metrics={liveMetrics} />
-          ) : (
-            <Paper withBorder p="md" shadow="sm">
-              <Text c="dimmed" size="sm">
-                Waiting for data...
-              </Text>
-            </Paper>
-          )}
 
           {showStats && <StatsView />}
         </Stack>
