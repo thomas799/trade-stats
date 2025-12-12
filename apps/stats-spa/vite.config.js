@@ -27,7 +27,7 @@ export default defineConfig({
         changeOrigin: true,
         logLevel: 'debug',
         secure: false,
-        target: process.env.VITE_API_URL || 'http://172.18.0.4',
+        target: 'http://backend:80',
         ws: true
       }
     }

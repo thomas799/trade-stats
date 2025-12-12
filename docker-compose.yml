@@ -11,8 +11,8 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://172.18.0.4
-    command: sh -c "npm install -g pnpm && cd /workspace && pnpm install && pnpm -F stats-spa dev -- --host 0.0.0.0"
+      - VITE_API_URL=http://localhost:8080/api
+    command: sh -c "[ ! -f /workspace/.env ] && cp /workspace/.env.example /workspace/.env || true && npm install -g pnpm && cd /workspace && pnpm install && pnpm -F stats-spa dev -- --host 0.0.0.0"
     networks:
       - trade-stats-network
     depends_on:
