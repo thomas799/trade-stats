@@ -5,6 +5,7 @@ import '@mantine/core/styles.css';
 import MathWorkerUrl from '@trade-stats/math-worker?worker&url';
 
 import ControlPanel from './components/ControlPanel';
+import LiveMetrics from './components/LiveMetrics';
 import StatsView from './components/StatsView';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [batchSize, setBatchSize] = useState(100);
   const [showStats, setShowStats] = useState(false);
   const [status, setStatus] = useState('');
+  const [liveMetrics, setLiveMetrics] = useState(null);
 
   const wsRef = useRef(null);
   const workerRef = useRef(null);
@@ -30,6 +32,8 @@ function App() {
       }
 
       if (type === 'STATS') {
+        setLiveMetrics(payload);
+
         try {
           setStatus('Sending statistics to server...');
 
@@ -51,6 +55,8 @@ function App() {
             method: 'POST'
           });
 
+          await response.json().catch(() => null);
+
           if (response.ok) {
             setStatus(`Batch of ${batchSize} quotes processed and sent`);
           } else {
@@ -58,14 +64,12 @@ function App() {
           }
         } catch (error) {
           setStatus('Error: ' + error.message);
-          console.error('Error sending stats:', error);
         }
-
-        localCountRef.current = 0;
       }
 
       if (type === 'RESET_COMPLETE') {
         setStatus('Statistics reset to Worker');
+        setLiveMetrics(null);
       }
     };
 
@@ -116,16 +120,16 @@ function App() {
           setMessageCount((prev) => prev + 1);
 
           if (localCountRef.current >= batchSize) {
+            localCountRef.current = 0;
             workerRef.current.postMessage({ type: 'GET_STATS' });
           }
-        } catch (error) {
-          console.error('Error processing quote:', error);
+        } catch {
+          // Skip malformed messages
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = () => {
         setStatus('WebSocket Error');
-        console.error('WebSocket error:', error);
       };
 
       ws.onclose = () => {
@@ -136,7 +140,6 @@ function App() {
       wsRef.current = ws;
     } catch (error) {
       setStatus('Connection error: ' + error.message);
-      console.error('Connection error:', error);
     }
   };
 
@@ -170,6 +173,8 @@ function App() {
             onShowStats={handleShowStats}
             onStart={handleStart}
           />
+
+          <LiveMetrics metrics={liveMetrics} />
 
           {showStats && <StatsView />}
         </Stack>
