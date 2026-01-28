@@ -1,7 +1,3 @@
-# Trade Stats
-
-An application for collecting and visualizing trade statistics.
-
 ## Start
 
 ```bash
